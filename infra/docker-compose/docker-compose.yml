@@ -151,6 +151,7 @@ services:
 
 networks:
   foodnet:
+    driver: bridge # <-- Esto asegura que se cree correctamente la red local
 
 volumes:
   pg_users:
