@@ -1,0 +1,90 @@
+{
+  "realm": "food-ordering",
+  "enabled": true,
+  "displayName": "Food Ordering",
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+
+  "roles": {
+    "realm": [
+      { "name": "ROLE_CLIENTE" },
+      { "name": "ROLE_RESTAURANTE" },
+      { "name": "ROLE_REPARTIDOR" },
+      { "name": "ROLE_ADMIN" }
+    ]
+  },
+
+  "clients": [
+    {
+      "clientId": "web-frontend",
+      "name": "Angular Web Frontend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+
+      "redirectUris": [
+        "http://localhost:4200/*"
+      ],
+      "webOrigins": [
+        "http://localhost:4200"
+      ],
+
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    }
+  ],
+
+  "users": [
+    {
+      "username": "cliente1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Cliente",
+      "lastName": "Demo",
+      "credentials": [
+        { "type": "password", "value": "Password123!", "temporary": false }
+      ],
+      "realmRoles": ["ROLE_CLIENTE"]
+    },
+    {
+      "username": "rest1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Restaurante",
+      "lastName": "Demo",
+      "credentials": [
+        { "type": "password", "value": "Password123!", "temporary": false }
+      ],
+      "realmRoles": ["ROLE_RESTAURANTE"]
+    },
+    {
+      "username": "repart1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Repartidor",
+      "lastName": "Demo",
+      "credentials": [
+        { "type": "password", "value": "Password123!", "temporary": false }
+      ],
+      "realmRoles": ["ROLE_REPARTIDOR"]
+    },
+    {
+      "username": "admin1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "Demo",
+      "credentials": [
+        { "type": "password", "value": "Password123!", "temporary": false }
+      ],
+      "realmRoles": ["ROLE_ADMIN"]
+    }
+  ]
+}

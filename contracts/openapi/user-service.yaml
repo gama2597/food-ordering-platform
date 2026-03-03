@@ -1,0 +1,430 @@
+openapi: 3.0.3
+info:
+  title: User Service API
+  version: 1.0.0
+  description: >
+    Servicio de Usuarios (perfil y direcciones). La autenticación la realiza Keycloak.
+    Este servicio valida JWT y gestiona datos de negocio del usuario.
+servers:
+  - url: http://localhost:8081
+    description: Local (dev)
+  - url: /user-service
+    description: Gateway/Ingress (placeholder)
+
+tags:
+  - name: Users
+    description: Perfil del usuario autenticado
+  - name: Addresses
+    description: Direcciones del usuario autenticado
+
+paths:
+  /api/v1/users/me:
+    get:
+      tags: [Users]
+      summary: Obtener el perfil del usuario autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+              examples:
+                ok:
+                  value:
+                    id: "4f3e8e2a-0e2b-4c08-9c2a-1f3a0a9d5a21"
+                    username: "cliente1"
+                    email: "cliente1@example.com"
+                    fullName: "Cliente Demo"
+                    phone: "+51 999 888 777"
+                    roles: ["ROLE_CLIENTE"]
+                    createdAt: "2026-03-02T12:00:00Z"
+                    updatedAt: "2026-03-02T12:00:00Z"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    put:
+      tags: [Users]
+      summary: Actualizar el perfil del usuario autenticado
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserProfileRequest"
+            examples:
+              req:
+                value:
+                  fullName: "Cliente Demo Actualizado"
+                  phone: "+51 900 111 222"
+      responses:
+        "200":
+          description: Perfil actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/users/me/addresses:
+    get:
+      tags: [Addresses]
+      summary: Listar direcciones del usuario autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddressListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    post:
+      tags: [Addresses]
+      summary: Crear una dirección para el usuario autenticado
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAddressRequest"
+            examples:
+              req:
+                value:
+                  label: "Casa"
+                  line1: "Av. Siempre Viva 742"
+                  line2: "Dpto 301"
+                  city: "Lima"
+                  state: "Lima"
+                  country: "PE"
+                  postalCode: "15001"
+                  reference: "Puerta azul"
+                  isDefault: true
+      responses:
+        "201":
+          description: Dirección creada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Address"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /api/v1/users/me/addresses/{addressId}:
+    put:
+      tags: [Addresses]
+      summary: Actualizar una dirección del usuario autenticado
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: addressId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAddressRequest"
+      responses:
+        "200":
+          description: Dirección actualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Address"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    delete:
+      tags: [Addresses]
+      summary: Eliminar una dirección del usuario autenticado
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: addressId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Eliminado
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            bad:
+              value:
+                code: "VALIDATION_ERROR"
+                message: "Request inválido"
+                details:
+                  - field: "phone"
+                    issue: "Formato inválido"
+    Unauthorized:
+      description: No autenticado / token inválido
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            un:
+              value:
+                code: "UNAUTHORIZED"
+                message: "Token inválido o ausente"
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            nf:
+              value:
+                code: "NOT_FOUND"
+                message: "No existe la dirección indicada"
+    InternalError:
+      description: Error interno
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  schemas:
+    UserProfile:
+      type: object
+      required: [id, username, email, fullName, roles, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+          example: cliente1
+        email:
+          type: string
+          format: email
+        fullName:
+          type: string
+          minLength: 2
+          maxLength: 120
+        phone:
+          type: string
+          nullable: true
+          example: "+51 999 888 777"
+        roles:
+          type: array
+          items:
+            type: string
+          example: ["ROLE_CLIENTE"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UpdateUserProfileRequest:
+      type: object
+      required: [fullName]
+      properties:
+        fullName:
+          type: string
+          minLength: 2
+          maxLength: 120
+        phone:
+          type: string
+          nullable: true
+          maxLength: 30
+
+    Address:
+      type: object
+      required: [id, label, line1, city, state, country, isDefault, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        label:
+          type: string
+          example: Casa
+        line1:
+          type: string
+          example: "Av. Siempre Viva 742"
+        line2:
+          type: string
+          nullable: true
+          example: "Dpto 301"
+        city:
+          type: string
+          example: Lima
+        state:
+          type: string
+          example: Lima
+        country:
+          type: string
+          example: PE
+        postalCode:
+          type: string
+          nullable: true
+          example: "15001"
+        reference:
+          type: string
+          nullable: true
+          example: "Puerta azul"
+        isDefault:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AddressListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Address"
+
+    CreateAddressRequest:
+      type: object
+      required: [label, line1, city, state, country]
+      properties:
+        label:
+          type: string
+          maxLength: 60
+        line1:
+          type: string
+          maxLength: 160
+        line2:
+          type: string
+          nullable: true
+          maxLength: 160
+        city:
+          type: string
+          maxLength: 80
+        state:
+          type: string
+          maxLength: 80
+        country:
+          type: string
+          maxLength: 2
+          description: ISO 3166-1 alpha-2 (ej: PE)
+        postalCode:
+          type: string
+          nullable: true
+          maxLength: 20
+        reference:
+          type: string
+          nullable: true
+          maxLength: 200
+        isDefault:
+          type: boolean
+          default: false
+
+    UpdateAddressRequest:
+      type: object
+      properties:
+        label:
+          type: string
+          maxLength: 60
+        line1:
+          type: string
+          maxLength: 160
+        line2:
+          type: string
+          nullable: true
+          maxLength: 160
+        city:
+          type: string
+          maxLength: 80
+        state:
+          type: string
+          maxLength: 80
+        country:
+          type: string
+          maxLength: 2
+        postalCode:
+          type: string
+          nullable: true
+          maxLength: 20
+        reference:
+          type: string
+          nullable: true
+          maxLength: 200
+        isDefault:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          example: VALIDATION_ERROR
+        message:
+          type: string
+          example: Request inválido
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              issue:
+                type: string

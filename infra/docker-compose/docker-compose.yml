@@ -1,23 +1,38 @@
 services:
-  # --- Kafka (KRaft) ---
+  # --- Kafka (Apache oficial) - KRaft (sin ZooKeeper) ---
   kafka:
-    image: bitnami/kafka:3.7
+    image: apache/kafka:4.1.1
     container_name: food-kafka
     environment:
       - TZ=${TZ}
-      - KAFKA_CFG_NODE_ID=1
-      - KAFKA_CFG_PROCESS_ROLES=broker,controller
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
-      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
-      - KAFKA_CFG_NUM_PARTITIONS=3
+
+      # KRaft combined mode (broker + controller en el mismo contenedor)
+      - KAFKA_NODE_ID=1
+      - KAFKA_PROCESS_ROLES=broker,controller
+
+      # 3 listeners:
+      # - PLAINTEXT (interno Docker) para otros contenedores (kafka-ui, microservicios en docker)
+      # - PLAINTEXT_HOST (host Windows) para tus apps corriendo en tu máquina (IDE, Angular, etc.)
+      # - CONTROLLER para el quorum (KRaft)
+      - KAFKA_LISTENERS=PLAINTEXT://:19092,PLAINTEXT_HOST://:9092,CONTROLLER://:9093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:19092,PLAINTEXT_HOST://localhost:9092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+
+      # Single node settings (replication factors)
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0
+
+      # Conveniencia para dev
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_NUM_PARTITIONS=3
     ports:
       - "9092:9092"
-    volumes:
-      - kafka_data:/bitnami/kafka
     networks: [foodnet]
 
   kafka-ui:
@@ -26,12 +41,13 @@ services:
     depends_on: [kafka]
     environment:
       - KAFKA_CLUSTERS_0_NAME=local
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      # Importante: desde dentro de Docker se conecta al listener interno
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:19092
     ports:
       - "8088:8080"
     networks: [foodnet]
 
-  # --- Postgres (one per service) ---
+  # --- Postgres (uno por microservicio) ---
   postgres-users:
     image: postgres:16-alpine
     container_name: pg-users
@@ -97,7 +113,7 @@ services:
       - pg_deliveries:/var/lib/postgresql/data
     networks: [foodnet]
 
-  # --- Keycloak + its DB ---
+  # --- Keycloak + su DB ---
   postgres-keycloak:
     image: postgres:16-alpine
     container_name: pg-keycloak
@@ -112,10 +128,10 @@ services:
     networks: [foodnet]
 
   keycloak:
-    image: quay.io/keycloak/keycloak:25.0
+    image: keycloak/keycloak:25.0
     container_name: food-keycloak
     depends_on: [postgres-keycloak]
-    command: ["start-dev"]
+    command: ["start-dev", "--import-realm"]
     environment:
       - TZ=${TZ}
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
@@ -125,17 +141,18 @@ services:
       - KC_DB_USERNAME=${KC_DB_USER}
       - KC_DB_PASSWORD=${KC_DB_PASSWORD}
       - KC_HTTP_PORT=8080
-      # For dev only. For prod, configure hostname + TLS behind Ingress.
+      # Dev (detrás de proxy/ingress luego)
       - KC_PROXY=edge
     ports:
       - "8080:8080"
+    volumes:
+      - ../keycloak:/opt/keycloak/data/import
     networks: [foodnet]
 
 networks:
   foodnet:
 
 volumes:
-  kafka_data:
   pg_users:
   pg_catalog:
   pg_orders:
