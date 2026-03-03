@@ -1,0 +1,29 @@
+apiVersion: v2
+name: food-ordering-platform
+description: Umbrella chart to deploy the whole platform
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+
+dependencies:
+  - name: api-gateway
+    version: 0.1.0
+    repository: "file://../api-gateway"
+  - name: web-frontend
+    version: 0.1.0
+    repository: "file://../web-frontend"
+  - name: user-service
+    version: 0.1.0
+    repository: "file://../user-service"
+  - name: catalog-service
+    version: 0.1.0
+    repository: "file://../catalog-service"
+  - name: order-service
+    version: 0.1.0
+    repository: "file://../order-service"
+  - name: payment-service
+    version: 0.1.0
+    repository: "file://../payment-service"
+  - name: delivery-service
+    version: 0.1.0
+    repository: "file://../delivery-service"

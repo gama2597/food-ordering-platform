@@ -1,0 +1,1 @@
+Aquí van los esquemas de eventos (v1, v2...) para Kafka.

@@ -1,0 +1,1 @@
+Aquí van los contratos OpenAPI por servicio (versionados).

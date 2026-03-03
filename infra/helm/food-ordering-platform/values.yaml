@@ -1,0 +1,17 @@
+# Global values for subcharts (optional)
+global:
+  env: dev
+
+# Example: override images/tags per component
+api-gateway:
+  image:
+    repository: food/api-gateway
+    tag: "0.1.0"
+
+web-frontend:
+  image:
+    repository: food/web-frontend
+    tag: "0.1.0"
+  service:
+    type: ClusterIP
+    port: 80

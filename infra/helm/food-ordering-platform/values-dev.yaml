@@ -1,0 +1,26 @@
+# Example dev overrides
+global:
+  env: dev
+
+# Typical for Docker Desktop local cluster (uses local images)
+user-service:
+  image:
+    pullPolicy: IfNotPresent
+catalog-service:
+  image:
+    pullPolicy: IfNotPresent
+order-service:
+  image:
+    pullPolicy: IfNotPresent
+payment-service:
+  image:
+    pullPolicy: IfNotPresent
+delivery-service:
+  image:
+    pullPolicy: IfNotPresent
+api-gateway:
+  image:
+    pullPolicy: IfNotPresent
+web-frontend:
+  image:
+    pullPolicy: IfNotPresent

@@ -1,0 +1,1 @@
+Pipelines CI/CD (placeholder). Se crearán workflows por ruta: services/**, frontend/**, infra/**.

@@ -1,0 +1,144 @@
+services:
+  # --- Kafka (KRaft) ---
+  kafka:
+    image: bitnami/kafka:3.7
+    container_name: food-kafka
+    environment:
+      - TZ=${TZ}
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_NUM_PARTITIONS=3
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/bitnami/kafka
+    networks: [foodnet]
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: food-kafka-ui
+    depends_on: [kafka]
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    ports:
+      - "8088:8080"
+    networks: [foodnet]
+
+  # --- Postgres (one per service) ---
+  postgres-users:
+    image: postgres:16-alpine
+    container_name: pg-users
+    environment:
+      - POSTGRES_DB=usersdb
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+    ports:
+      - "${PG_USERS_PORT}:5432"
+    volumes:
+      - pg_users:/var/lib/postgresql/data
+    networks: [foodnet]
+
+  postgres-catalog:
+    image: postgres:16-alpine
+    container_name: pg-catalog
+    environment:
+      - POSTGRES_DB=catalogdb
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+    ports:
+      - "${PG_CATALOG_PORT}:5432"
+    volumes:
+      - pg_catalog:/var/lib/postgresql/data
+    networks: [foodnet]
+
+  postgres-orders:
+    image: postgres:16-alpine
+    container_name: pg-orders
+    environment:
+      - POSTGRES_DB=ordersdb
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+    ports:
+      - "${PG_ORDERS_PORT}:5432"
+    volumes:
+      - pg_orders:/var/lib/postgresql/data
+    networks: [foodnet]
+
+  postgres-payments:
+    image: postgres:16-alpine
+    container_name: pg-payments
+    environment:
+      - POSTGRES_DB=paymentsdb
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+    ports:
+      - "${PG_PAYMENTS_PORT}:5432"
+    volumes:
+      - pg_payments:/var/lib/postgresql/data
+    networks: [foodnet]
+
+  postgres-deliveries:
+    image: postgres:16-alpine
+    container_name: pg-deliveries
+    environment:
+      - POSTGRES_DB=deliveriesdb
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+    ports:
+      - "${PG_DELIVERIES_PORT}:5432"
+    volumes:
+      - pg_deliveries:/var/lib/postgresql/data
+    networks: [foodnet]
+
+  # --- Keycloak + its DB ---
+  postgres-keycloak:
+    image: postgres:16-alpine
+    container_name: pg-keycloak
+    environment:
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=${KC_DB_USER}
+      - POSTGRES_PASSWORD=${KC_DB_PASSWORD}
+    ports:
+      - "${PG_KEYCLOAK_PORT}:5432"
+    volumes:
+      - pg_keycloak:/var/lib/postgresql/data
+    networks: [foodnet]
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    container_name: food-keycloak
+    depends_on: [postgres-keycloak]
+    command: ["start-dev"]
+    environment:
+      - TZ=${TZ}
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres-keycloak:5432/keycloak
+      - KC_DB_USERNAME=${KC_DB_USER}
+      - KC_DB_PASSWORD=${KC_DB_PASSWORD}
+      - KC_HTTP_PORT=8080
+      # For dev only. For prod, configure hostname + TLS behind Ingress.
+      - KC_PROXY=edge
+    ports:
+      - "8080:8080"
+    networks: [foodnet]
+
+networks:
+  foodnet:
+
+volumes:
+  kafka_data:
+  pg_users:
+  pg_catalog:
+  pg_orders:
+  pg_payments:
+  pg_deliveries:
+  pg_keycloak:

@@ -1,0 +1,20 @@
+# Java
+**/target/
+**/.classpath
+**/.project
+**/.settings/
+**/*.iml
+.idea/
+
+# Node/Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.cache/
+
+# Env
+infra/docker-compose/.env
+
+# OS
+.DS_Store
+Thumbs.db
