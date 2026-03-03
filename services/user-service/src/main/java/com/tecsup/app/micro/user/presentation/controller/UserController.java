@@ -1,54 +1,57 @@
 package com.tecsup.app.micro.user.presentation.controller;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
-
+import com.tecsup.app.micro.user.application.service.UserApplicationService;
+import com.tecsup.app.micro.user.application.usecase.GetMyProfileUseCase.MyPrincipal;
+import com.tecsup.app.micro.user.presentation.dto.UpdateUserProfileRequest;
+import com.tecsup.app.micro.user.presentation.mapper.UserDtoMapper;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
+@RequiredArgsConstructor
 public class UserController {
 
-    @GetMapping("/me")
-    public UserProfileResponse me(@AuthenticationPrincipal Jwt jwt, Authentication auth) {
+        private final UserApplicationService service;
+        private final UserDtoMapper mapper;
 
-        UUID id = UUID.fromString(jwt.getSubject()); // sub suele ser UUID
-        String username = jwt.getClaimAsString("preferred_username");
-        String email = jwt.getClaimAsString("email");
-        String fullName = jwt.getClaimAsString("name");
+        @GetMapping("/me")
+        public Object me(@AuthenticationPrincipal Jwt jwt, Authentication auth) {
+                List<String> roles = auth.getAuthorities().stream()
+                                .map(GrantedAuthority::getAuthority)
+                                .filter(r -> r.startsWith("ROLE_"))
+                                .sorted()
+                                .toList();
 
-        List<String> roles = auth.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .filter(r -> r.startsWith("ROLE_"))
-                .sorted()
-                .toList();
+                var principal = new MyPrincipal(
+                                jwt.getSubject(),
+                                jwt.getClaimAsString("preferred_username"),
+                                jwt.getClaimAsString("email"),
+                                jwt.getClaimAsString("name"),
+                                roles);
 
-        Instant now = Instant.now();
+                var result = service.getMyProfile(principal);
+                return mapper.toUserProfileResponse(result.profile(), result.roles());
+        }
 
-        return new UserProfileResponse(
-                id,
-                username,
-                email,
-                fullName != null ? fullName : username,
-                null,
-                roles,
-                now,
-                now);
-    }
+        @PutMapping("/me")
+        public Object updateMe(@AuthenticationPrincipal Jwt jwt, Authentication auth,
+                        @Valid @RequestBody UpdateUserProfileRequest req) {
+                var updated = service.updateMyProfile(jwt.getSubject(), req.fullName(), req.phone());
 
-    public record UserProfileResponse(
-            UUID id,
-            String username,
-            String email,
-            String fullName,
-            String phone,
-            List<String> roles,
-            Instant createdAt,
-            Instant updatedAt) {
-    }
+                List<String> roles = auth.getAuthorities().stream()
+                                .map(GrantedAuthority::getAuthority)
+                                .filter(r -> r.startsWith("ROLE_"))
+                                .sorted()
+                                .toList();
+
+                return mapper.toUserProfileResponse(updated, roles);
+        }
 }

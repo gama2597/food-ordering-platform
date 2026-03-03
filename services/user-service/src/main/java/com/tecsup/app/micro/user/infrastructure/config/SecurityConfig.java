@@ -27,7 +27,6 @@ public class SecurityConfig {
         .cors(Customizer.withDefaults())
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/actuator/**").permitAll()
-            .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
             .anyRequest().authenticated())
         .oauth2ResourceServer(oauth2 -> oauth2
             .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
@@ -35,7 +34,6 @@ public class SecurityConfig {
     return http.build();
   }
 
-  // CORS para que Angular (localhost:4200) pueda llamar al backend en dev
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
@@ -69,7 +67,8 @@ public class SecurityConfig {
       return roles.stream()
           .filter(Objects::nonNull)
           .map(Object::toString)
-          .map(SimpleGrantedAuthority::new) // como tus roles ya son "ROLE_*", los dejamos igual
+          // tus roles ya vienen como ROLE_*, los dejamos tal cual
+          .map(SimpleGrantedAuthority::new)
           .collect(Collectors.toUnmodifiableList());
     };
   }
