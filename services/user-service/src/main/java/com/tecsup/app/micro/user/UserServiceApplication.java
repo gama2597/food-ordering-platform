@@ -1,4 +1,4 @@
-package om.tecsup.app.micro.user;
+package com.tecsup.app.micro.user;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
