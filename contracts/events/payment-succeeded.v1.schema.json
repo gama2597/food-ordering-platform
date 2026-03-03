@@ -1,0 +1,67 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "payment-succeeded.v1.schema.json",
+    "title": "PaymentSucceededV1",
+    "allOf": [
+        {
+            "$ref": "./event-envelope.v1.schema.json"
+        },
+        {
+            "type": "object",
+            "properties": {
+                "eventType": {
+                    "const": "PaymentSucceeded"
+                },
+                "schemaVersion": {
+                    "const": "v1"
+                },
+                "producer": {
+                    "const": "payment-service"
+                },
+                "data": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "orderId",
+                        "paymentId",
+                        "amount",
+                        "currency",
+                        "provider"
+                    ],
+                    "properties": {
+                        "orderId": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "paymentId": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "amount": {
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        "currency": {
+                            "type": "string",
+                            "minLength": 3,
+                            "maxLength": 3,
+                            "examples": [
+                                "PEN"
+                            ]
+                        },
+                        "provider": {
+                            "type": "string",
+                            "examples": [
+                                "mock",
+                                "stripe"
+                            ]
+                        },
+                        "providerRef": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

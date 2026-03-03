@@ -1,0 +1,52 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "delivery-status-updated.v1.schema.json",
+    "title": "DeliveryStatusUpdatedV1",
+    "allOf": [
+        {
+            "$ref": "./event-envelope.v1.schema.json"
+        },
+        {
+            "type": "object",
+            "properties": {
+                "eventType": {
+                    "const": "DeliveryStatusUpdated"
+                },
+                "schemaVersion": {
+                    "const": "v1"
+                },
+                "producer": {
+                    "const": "delivery-service"
+                },
+                "data": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "deliveryId",
+                        "orderId",
+                        "status"
+                    ],
+                    "properties": {
+                        "deliveryId": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "orderId": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "status": {
+                            "type": "string",
+                            "enum": [
+                                "ASSIGNED",
+                                "PICKED_UP",
+                                "DELIVERED",
+                                "CANCELLED"
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,50 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "payment-failed.v1.schema.json",
+    "title": "PaymentFailedV1",
+    "allOf": [
+        {
+            "$ref": "./event-envelope.v1.schema.json"
+        },
+        {
+            "type": "object",
+            "properties": {
+                "eventType": {
+                    "const": "PaymentFailed"
+                },
+                "schemaVersion": {
+                    "const": "v1"
+                },
+                "producer": {
+                    "const": "payment-service"
+                },
+                "data": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "orderId",
+                        "reasonCode"
+                    ],
+                    "properties": {
+                        "orderId": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "reasonCode": {
+                            "type": "string",
+                            "enum": [
+                                "INSUFFICIENT_FUNDS",
+                                "CARD_DECLINED",
+                                "TIMEOUT",
+                                "UNKNOWN"
+                            ]
+                        },
+                        "message": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

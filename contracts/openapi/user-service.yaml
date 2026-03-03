@@ -363,7 +363,6 @@ components:
         country:
           type: string
           maxLength: 2
-          description: ISO 3166-1 alpha-2 (ej: PE)
         postalCode:
           type: string
           nullable: true

@@ -1,0 +1,47 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "event-envelope.v1.schema.json",
+    "title": "EventEnvelopeV1",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "eventId",
+        "eventType",
+        "schemaVersion",
+        "occurredAt",
+        "producer",
+        "data"
+    ],
+    "properties": {
+        "eventId": {
+            "type": "string",
+            "format": "uuid"
+        },
+        "eventType": {
+            "type": "string",
+            "minLength": 1
+        },
+        "schemaVersion": {
+            "type": "string",
+            "pattern": "^v\\d+$"
+        },
+        "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+        },
+        "traceId": {
+            "type": "string",
+            "minLength": 1
+        },
+        "subject": {
+            "type": "string"
+        },
+        "producer": {
+            "type": "string",
+            "minLength": 1
+        },
+        "data": {
+            "type": "object"
+        }
+    }
+}
