@@ -1,5 +1,6 @@
 package com.tecsup.app.micro.user.infrastructure.persistence.entity;
 
+import com.tecsup.app.micro.user.domain.constant.ValidationConstants;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,16 +18,16 @@ public class UserProfileEntity {
     @Column(columnDefinition = "uuid")
     private UUID id;
 
-    @Column(nullable = false, length = 60)
+    @Column(nullable = false, length = ValidationConstants.USERNAME_MAX)
     private String username;
 
-    @Column(nullable = false, length = 254)
+    @Column(nullable = false, length = ValidationConstants.EMAIL_MAX)
     private String email;
 
-    @Column(name = "full_name", nullable = false, length = 120)
+    @Column(name = "full_name", nullable = false, length = ValidationConstants.FULL_NAME_MAX)
     private String fullName;
 
-    @Column(length = 30)
+    @Column(length = ValidationConstants.PHONE_MAX)
     private String phone;
 
     @Column(name = "created_at", nullable = false)
@@ -45,5 +46,20 @@ public class UserProfileEntity {
     @PreUpdate
     void onUpdate() {
         updatedAt = Instant.now();
+    }
+
+    // NUEVO: Equals y HashCode basados en el ID del negocio
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof UserProfileEntity that))
+            return false;
+        return id != null && id.equals(that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

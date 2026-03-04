@@ -1,5 +1,6 @@
 package com.tecsup.app.micro.user.infrastructure.persistence.entity;
 
+import com.tecsup.app.micro.user.domain.constant.ValidationConstants;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,28 +22,28 @@ public class AddressEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserProfileEntity user;
 
-    @Column(nullable = false, length = 60)
+    @Column(nullable = false, length = ValidationConstants.ADDRESS_LABEL_MAX)
     private String label;
 
-    @Column(nullable = false, length = 160)
+    @Column(nullable = false, length = ValidationConstants.ADDRESS_LINE_MAX)
     private String line1;
 
-    @Column(length = 160)
+    @Column(length = ValidationConstants.ADDRESS_LINE_MAX)
     private String line2;
 
-    @Column(nullable = false, length = 80)
+    @Column(nullable = false, length = ValidationConstants.ADDRESS_CITY_MAX)
     private String city;
 
-    @Column(nullable = false, length = 80)
+    @Column(nullable = false, length = ValidationConstants.ADDRESS_STATE_MAX)
     private String state;
 
-    @Column(nullable = false, length = 2)
+    @Column(nullable = false, length = ValidationConstants.ADDRESS_COUNTRY_MAX)
     private String country;
 
-    @Column(name = "postal_code", length = 20)
+    @Column(name = "postal_code", length = ValidationConstants.ADDRESS_POSTAL_MAX)
     private String postalCode;
 
-    @Column(length = 200)
+    @Column(length = ValidationConstants.ADDRESS_REF_MAX)
     private String reference;
 
     @Column(name = "is_default", nullable = false)
@@ -64,5 +65,20 @@ public class AddressEntity {
     @PreUpdate
     void onUpdate() {
         updatedAt = Instant.now();
+    }
+
+    // NUEVO: Equals y HashCode basados en el ID del negocio
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof AddressEntity that))
+            return false;
+        return id != null && id.equals(that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

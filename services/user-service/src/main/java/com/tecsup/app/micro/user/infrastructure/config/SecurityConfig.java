@@ -5,9 +5,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,11 +19,40 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.*;
 
 @Configuration
+@EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
+  /**
+   * Chain 1 (Order 1): Swagger UI y OpenAPI docs PÚBLICOS.
+   * La interfaz gráfica carga directo. La autenticación real se hace
+   * desde el botón "Authorize" de Swagger (flujo PKCE en el navegador).
+   */
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  @Order(1)
+  public SecurityFilterChain swaggerChain(HttpSecurity http) throws Exception {
+    http
+        .securityMatcher(
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/v3/api-docs/**",
+            "/swagger-resources/**",
+            "/webjars/**")
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+            .anyRequest().permitAll());
+
+    return http.build();
+  }
+
+  /**
+   * Chain 2 (Order 2): API protegida como Resource Server (JWT).
+   * Todo lo que no sea Swagger (tus endpoints /api/v1/**) cae aquí
+   * y requiere un Bearer Token válido.
+   */
+  @Bean
+  @Order(2)
+  public SecurityFilterChain apiChain(HttpSecurity http) throws Exception {
     http
         .csrf(csrf -> csrf.disable())
         .cors(Customizer.withDefaults())
@@ -34,8 +65,11 @@ public class SecurityConfig {
     return http.build();
   }
 
+  /**
+   * CORS para dev (Angular/React localhost:4200, 3000, etc).
+   */
   @Bean
-  CorsConfigurationSource corsConfigurationSource() {
+  public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
     config.setAllowedOrigins(List.of("http://localhost:4200"));
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
@@ -47,8 +81,11 @@ public class SecurityConfig {
     return source;
   }
 
+  /**
+   * Mapea roles de Keycloak (realm_access.roles) -> authorities Spring.
+   */
   @Bean
-  JwtAuthenticationConverter jwtAuthenticationConverter() {
+  public JwtAuthenticationConverter jwtAuthenticationConverter() {
     JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
     converter.setJwtGrantedAuthoritiesConverter(keycloakRealmRolesConverter());
     return converter;
@@ -67,7 +104,6 @@ public class SecurityConfig {
       return roles.stream()
           .filter(Objects::nonNull)
           .map(Object::toString)
-          // tus roles ya vienen como ROLE_*, los dejamos tal cual
           .map(SimpleGrantedAuthority::new)
           .collect(Collectors.toUnmodifiableList());
     };

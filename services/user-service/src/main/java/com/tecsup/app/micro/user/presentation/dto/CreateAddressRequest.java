@@ -1,15 +1,16 @@
 package com.tecsup.app.micro.user.presentation.dto;
 
+import com.tecsup.app.micro.user.domain.constant.ValidationConstants;
 import jakarta.validation.constraints.*;
 
 public record CreateAddressRequest(
-        @NotBlank @Size(max = 60) String label,
-        @NotBlank @Size(max = 160) String line1,
-        @Size(max = 160) String line2,
-        @NotBlank @Size(max = 80) String city,
-        @NotBlank @Size(max = 80) String state,
-        @NotBlank @Size(min = 2, max = 2) String country,
-        @Size(max = 20) String postalCode,
-        @Size(max = 200) String reference,
-        Boolean isDefault) {
+                @NotBlank @Size(max = ValidationConstants.ADDRESS_LABEL_MAX) String label,
+                @NotBlank @Size(max = ValidationConstants.ADDRESS_LINE_MAX) String line1,
+                @Size(max = ValidationConstants.ADDRESS_LINE_MAX) String line2,
+                @NotBlank @Size(max = ValidationConstants.ADDRESS_CITY_MAX) String city,
+                @NotBlank @Size(max = ValidationConstants.ADDRESS_STATE_MAX) String state,
+                @NotBlank @Size(min = ValidationConstants.ADDRESS_COUNTRY_MIN, max = ValidationConstants.ADDRESS_COUNTRY_MAX) String country,
+                @Size(max = ValidationConstants.ADDRESS_POSTAL_MAX) String postalCode,
+                @Size(max = ValidationConstants.ADDRESS_REF_MAX) String reference,
+                Boolean isDefault) {
 }

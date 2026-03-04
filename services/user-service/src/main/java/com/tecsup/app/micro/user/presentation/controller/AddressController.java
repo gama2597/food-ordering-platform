@@ -25,11 +25,9 @@ public class AddressController {
 
     @GetMapping
     public AddressListResponse list(@AuthenticationPrincipal Jwt jwt) {
-        var list = service.listMyAddresses(jwt.getSubject()).stream()
-                .map(mapper::toAddressResponse)
-                .toList();
-
-        return new AddressListResponse(list);
+        var addresses = service.listMyAddresses(jwt.getSubject());
+        // Usamos el nuevo método del mapper
+        return new AddressListResponse(mapper.toAddressResponseList(addresses));
     }
 
     @PostMapping

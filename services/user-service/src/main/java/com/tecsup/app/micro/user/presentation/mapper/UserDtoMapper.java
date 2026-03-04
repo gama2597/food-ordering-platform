@@ -15,4 +15,7 @@ public interface UserDtoMapper {
     UserProfileResponse toUserProfileResponse(UserProfile profile, List<String> roles);
 
     AddressResponse toAddressResponse(Address address);
+
+    // NUEVO: MapStruct autogenerará el bucle por nosotros
+    List<AddressResponse> toAddressResponseList(List<Address> addresses);
 }

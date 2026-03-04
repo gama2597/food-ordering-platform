@@ -15,7 +15,7 @@ public interface JpaAddressRepository extends JpaRepository<AddressEntity, UUID>
 
     Optional<AddressEntity> findByIdAndUser_Id(UUID id, UUID userId);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
     @Query("update AddressEntity a set a.isDefault = false where a.user.id = :userId and a.isDefault = true")
     int clearDefault(@Param("userId") UUID userId);

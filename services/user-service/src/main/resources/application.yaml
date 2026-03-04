@@ -16,16 +16,33 @@ spring:
     properties:
       hibernate:
         format_sql: true
+    open-in-view: false
 
   flyway:
     enabled: true
     locations: classpath:db/migration
 
   security:
+    # ✅ Resource Server (JWT) - esto crea el JwtDecoder
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/food-ordering}
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8080/realms/food-ordering/protocol/openid-connect/certs}
+
+      # ✅ OAuth2 Client (para oauth2Login de Swagger)
+      client:
+        provider:
+          keycloak:
+            issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/food-ordering}
+        registration:
+          swagger:
+            provider: keycloak
+            client-id: swagger-ui
+            client-authentication-method: none
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: openid,profile,email
 
 management:
   endpoints:
@@ -36,3 +53,18 @@ management:
     health:
       probes:
         enabled: true
+
+app:
+  security:
+    keycloak:
+      base-url: http://localhost:8080
+      realm: food-ordering
+
+springdoc:
+  swagger-ui:
+    oauth:
+      client-id: swagger-ui
+      use-pkce-with-authorization-code-grant: true
+      scopes: openid profile email
+    oauth2RedirectUrl: http://localhost:8081/swagger-ui/oauth2-redirect.html
+    persistAuthorization: true
