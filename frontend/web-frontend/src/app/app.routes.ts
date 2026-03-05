@@ -1,7 +1,16 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from 'src/app/features/home/home.component';
+import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
+import { HomeComponent } from './features/home/home.component'; // O la feature que usemos de inicio
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: '**', redirectTo: '' } // Cualquier ruta no encontrada te manda al inicio
+  {
+    path: '',
+    component: AppLayoutComponent, // El cascarón principal
+    children: [
+      { path: 'home', component: HomeComponent },
+      { path: 'usuarios', loadComponent: () => import('./features/usuarios/pages/usuarios/usuarios.component').then(m => m.UsuariosComponent) },
+      { path: '', redirectTo: 'home', pathMatch: 'full' }
+    ]
+  },
+  { path: '**', redirectTo: '' }
 ];

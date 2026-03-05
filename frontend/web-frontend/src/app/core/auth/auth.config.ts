@@ -4,9 +4,15 @@ import { environment } from '../../../environments/environment';
 export const authConfig: AuthConfig = {
   issuer: environment.keycloak.issuer,
   clientId: environment.keycloak.clientId,
-  redirectUri: window.location.origin + '/',
-  scope: 'openid profile email',
+
+  redirectUri: window.location.origin + '/home',
+
   responseType: 'code',
+  scope: 'openid profile email',
+
+  requireHttps: false,
+  strictDiscoveryDocumentValidation: false,
+  
   showDebugInformation: !environment.production,
   disableAtHashCheck: true
 };

@@ -3,7 +3,7 @@ import { OAuthService } from 'angular-oauth2-oidc';
 import { authConfig } from 'src/app/core/auth/auth.config';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   // Estado reactivo con Signals
@@ -17,20 +17,31 @@ export class AuthService {
     this.oauthService.configure(authConfig);
     this.oauthService.setupAutomaticSilentRefresh();
 
-    return this.oauthService.loadDiscoveryDocumentAndLogin().then(loggedIn => {
-      this.authState.set(loggedIn);
+    return this.oauthService
+      .loadDiscoveryDocumentAndLogin()
+      .then((loggedIn) => {
+        this.authState.set(loggedIn);
 
-      if (loggedIn) {
-        console.log('✅ Autenticado en Angular 18. Token:', this.token);
-      } else {
-        console.log('⏳ Redirigiendo a Keycloak...');
-        this.oauthService.initCodeFlow();
-      }
-      return loggedIn;
-    });
+        if (loggedIn) {
+          console.log('✅ Autenticado en Angular 18. Token:', this.token);
+        } else {
+          console.log('⏳ Redirigiendo a Keycloak...');
+          this.oauthService.initCodeFlow();
+        }
+        return loggedIn;
+      });
   }
 
-  get token() { return this.oauthService.getAccessToken(); }
-  get identityClaims() { return this.oauthService.getIdentityClaims(); }
-  logout() { this.oauthService.logOut(); }
+  get token() {
+    return this.oauthService.getAccessToken();
+  }
+  get identityClaims() {
+    return this.oauthService.getIdentityClaims();
+  }
+  login() {
+    this.oauthService.initCodeFlow();
+  }
+  logout() {
+    this.oauthService.logOut();
+  }
 }

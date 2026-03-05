@@ -14,6 +14,7 @@ public interface UserDtoMapper {
     @Mapping(target = "roles", expression = "java(roles)")
     UserProfileResponse toUserProfileResponse(UserProfile profile, List<String> roles);
 
+    @Mapping(target = "isDefault", expression = "java(address.isDefault())")
     AddressResponse toAddressResponse(Address address);
 
     // NUEVO: MapStruct autogenerará el bucle por nosotros

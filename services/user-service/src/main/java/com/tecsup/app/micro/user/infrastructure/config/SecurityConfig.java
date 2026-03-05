@@ -55,7 +55,7 @@ public class SecurityConfig {
   public SecurityFilterChain apiChain(HttpSecurity http) throws Exception {
     http
         .csrf(csrf -> csrf.disable())
-        .cors(Customizer.withDefaults())
+        //.cors(Customizer.withDefaults())
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/actuator/**").permitAll()
             .anyRequest().authenticated())
@@ -68,18 +68,18 @@ public class SecurityConfig {
   /**
    * CORS para dev (Angular/React localhost:4200, 3000, etc).
    */
-  @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration config = new CorsConfiguration();
-    config.setAllowedOrigins(List.of("http://localhost:4200"));
-    config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-    config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-    config.setAllowCredentials(true);
+  // @Bean
+  // public CorsConfigurationSource corsConfigurationSource() {
+  //   CorsConfiguration config = new CorsConfiguration();
+  //   config.setAllowedOrigins(List.of("http://localhost:4200"));
+  //   config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+  //   config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+  //   config.setAllowCredentials(true);
 
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", config);
-    return source;
-  }
+  //   UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+  //   source.registerCorsConfiguration("/**", config);
+  //   return source;
+  // }
 
   /**
    * Mapea roles de Keycloak (realm_access.roles) -> authorities Spring.

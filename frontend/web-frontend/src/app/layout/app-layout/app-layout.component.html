@@ -1,0 +1,15 @@
+<p-toast position="top-right"></p-toast>
+
+<div class="min-h-screen flex flex-column surface-ground">
+  <app-header></app-header>
+
+  <div class="flex flex-1 overflow-hidden">
+    <app-sidebar></app-sidebar>
+
+    <main class="flex-1 p-4 overflow-y-auto">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <app-footer></app-footer>
+</div>

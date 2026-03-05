@@ -1,0 +1,66 @@
+<p-dialog [header]="mode === 'create' ? 'Nueva Dirección' : 'Editar Dirección'" [(visible)]="visible" [modal]="true"
+  [closable]="true" [style]="{width: '520px'}" (onHide)="close()">
+  <form [formGroup]="form" class="p-fluid">
+
+    <div class="field">
+      <label>Etiqueta</label>
+      <input pInputText formControlName="label" placeholder="Casa / Trabajo" />
+      <small class="p-error" *ngIf="form.controls.label.touched && form.controls.label.invalid">
+        Etiqueta requerida
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Dirección (línea 1)</label>
+      <input pInputText formControlName="line1" placeholder="Av. ... 123" />
+      <small class="p-error" *ngIf="form.controls.line1.touched && form.controls.line1.invalid">
+        Dirección requerida
+      </small>
+    </div>
+
+    <div class="field">
+      <label>Dirección (línea 2)</label>
+      <input pInputText formControlName="line2" placeholder="Dpto / Referencia adicional" />
+    </div>
+
+    <div class="grid">
+      <div class="col-12 md:col-6 field">
+        <label>Ciudad</label>
+        <input pInputText formControlName="city" />
+      </div>
+
+      <div class="col-12 md:col-6 field">
+        <label>Estado/Región</label>
+        <input pInputText formControlName="state" />
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="col-12 md:col-6 field">
+        <label>País (ISO2)</label>
+        <input pInputText formControlName="country" maxlength="2" />
+      </div>
+
+      <div class="col-12 md:col-6 field">
+        <label>Código Postal</label>
+        <input pInputText formControlName="postalCode" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Referencia</label>
+      <input pInputText formControlName="reference" />
+    </div>
+
+    <div class="field-checkbox">
+      <p-checkbox formControlName="isDefault" [binary]="true"></p-checkbox>
+      <label>Marcar como dirección por defecto</label>
+    </div>
+
+  </form>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" severity="secondary" [text]="true" (onClick)="close()"></p-button>
+    <p-button label="Guardar" (onClick)="save()"></p-button>
+  </ng-template>
+</p-dialog>

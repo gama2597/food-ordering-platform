@@ -8,9 +8,16 @@ import org.mapstruct.*;
 public interface AddressEntityMapper {
 
     @Mapping(source = "user.id", target = "userId")
+    @Mapping(target = "isDefault", expression = "java(entity.isDefault())")
     Address toDomain(AddressEntity entity);
 
-    // user se setea en el repo impl (owner), por eso se ignora aquí
     @Mapping(target = "user", ignore = true)
     AddressEntity toEntity(Address domain);
+
+    // ✅ Fuerza el set del flag al Entity (porque Lombok suele generar setDefault()
+    // y MapStruct se confunde)
+    @AfterMapping
+    default void afterToEntity(Address domain, @MappingTarget AddressEntity entity) {
+        entity.setDefault(domain.isDefault());
+    }
 }
