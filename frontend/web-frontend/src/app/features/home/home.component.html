@@ -1,0 +1,17 @@
+<div class="flex justify-content-center align-items-center min-h-screen surface-100">
+
+  <p-card header="¡Bienvenido a Food Ordering!" [style]="{ width: '450px' }">
+    <p class="m-0 mb-3 text-color-secondary">
+      Has iniciado sesión exitosamente mediante Keycloak OIDC.
+    </p>
+
+    <div class="mb-4">
+      <strong class="block mb-2">Tus datos (Identity Claims):</strong>
+      <pre class="surface-200 p-3 border-round overflow-auto text-sm">{{ claims | json }}</pre>
+    </div>
+
+    <p-button label="Cerrar Sesión" icon="pi pi-sign-out" severity="danger" (onClick)="logout()">
+    </p-button>
+  </p-card>
+
+</div>
